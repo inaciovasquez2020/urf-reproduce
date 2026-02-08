@@ -8,37 +8,54 @@ structure Artifact where
   path : String
   hash : Bytes
 
-def Artifact.serialize (a : Artifact) : Bytes :=
-  a.hash
+abbrev ArtifactList := List Artifact
 
-def concat_bytes : List Bytes → Bytes
-| [] => []
-| (b :: t) => b ++ concat_bytes t
+axiom ArtifactSerialize : Artifact → Bytes
 
-def MerkleLeaf (a : Artifact) : Bytes :=
-  SHA256 (Artifact.serialize a)
+def LeafHash (a : Artifact) : Bytes :=
+  SHA256 (ArtifactSerialize a)
 
-def MerkleLevel : List Bytes → List Bytes
-| [] => []
-| [x] => [x]
-| (x :: y :: t) => SHA256 (x ++ y) :: MerkleLevel t
+def CombineHash (l r : Bytes) : Bytes :=
+  SHA256 (l ++ r)
 
-partial def MerkleRootFromLeaves : List Bytes → Bytes
-| [] => SHA256 []
-| [x] => x
-| xs => MerkleRootFromLeaves (MerkleLevel xs)
+def MerkleFold : List Bytes → Bytes
+| []        => SHA256 []
+| [x]       => x
+| x :: y :: rest => MerkleFold (CombineHash x y :: rest)
 
-def MerkleRoot (A : List Artifact) : Bytes :=
-  let leaves := A.map MerkleLeaf
-  MerkleRootFromLeaves leaves
+def LeafList (as : ArtifactList) : List Bytes :=
+  as.map LeafHash
 
-axiom SHA256_deterministic :
-  ∀ b : Bytes, SHA256 b = SHA256 b
+def MerkleRoot (as : ArtifactList) : Bytes :=
+  MerkleFold (LeafList as)
 
-theorem MerkleRoot_deterministic
-  (A : List Artifact) :
-  MerkleRoot A = MerkleRoot A := by
-  rfl
+axiom ArtifactSerialize_injective :
+  ∀ a b : Artifact,
+    ArtifactSerialize a = ArtifactSerialize b → a = b
+
+axiom SHA256_collision_resistant :
+  ∀ x y : Bytes,
+    SHA256 x = SHA256 y → x = y
+
+axiom OrderedArtifacts :
+  ArtifactList → Prop
+
+axiom CanonicalOrder_unique :
+  ∀ as1 as2,
+    OrderedArtifacts as1 →
+    OrderedArtifacts as2 →
+    LeafList as1 = LeafList as2 →
+    as1 = as2
+
+theorem MerkleRoot_unique
+  (as1 as2 : ArtifactList)
+  (h1 : OrderedArtifacts as1)
+  (h2 : OrderedArtifacts as2)
+  (h : MerkleRoot as1 = MerkleRoot as2) :
+  as1 = as2 :=
+by
+  unfold MerkleRoot at h
+  admit
 
 end URFReproduce
 

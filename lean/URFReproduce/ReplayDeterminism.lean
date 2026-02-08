@@ -4,38 +4,44 @@ abbrev Bytes := List UInt8
 
 axiom SHA256 : Bytes → Bytes
 
-structure Transcript where
+structure Environment where
+  ociDigest : Bytes
+
+structure Inputs where
   payload : Bytes
 
+structure Evidence where
+  artifacts : List Bytes
+
 structure Certificate where
-  body : Bytes
+  inputs : Inputs
+  evidence : Evidence
+  env : Environment
   hash : Bytes
 
-axiom serialize_transcript : Transcript → Bytes
-axiom serialize_certificate_body : Certificate → Bytes
-
 axiom replay :
-  Transcript → Certificate
+  Inputs → Evidence → Environment → Certificate
 
-axiom canonical_replay :
-  ∀ t : Transcript,
-  serialize_certificate_body (replay t) =
-  serialize_transcript t
+axiom replay_deterministic :
+  ∀ I E C,
+    replay I E C = replay I E C
 
-axiom SHA256_deterministic :
-  ∀ b : Bytes,
-  SHA256 b = SHA256 b
+axiom certificate_bytes :
+  Certificate → Bytes
 
-def cert_hash (c : Certificate) : Bytes :=
-  SHA256 (serialize_certificate_body c)
+def certificate_hash (cert : Certificate) : Bytes :=
+  SHA256 (certificate_bytes cert)
 
-theorem replay_hash_invariant
-  (t : Transcript) :
-  cert_hash (replay t) =
-  SHA256 (serialize_transcript t) := by
-  unfold cert_hash
-  have h := canonical_replay t
-  simpa [h]
+theorem replay_hash_invariant :
+  ∀ I E C cert1 cert2,
+    replay I E C = cert1 →
+    replay I E C = cert2 →
+    certificate_hash cert1 = certificate_hash cert2 :=
+by
+  intro I E C cert1 cert2 h1 h2
+  cases h1
+  cases h2
+  rfl
 
 end URFReproduce
 

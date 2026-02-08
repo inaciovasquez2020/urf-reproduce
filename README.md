@@ -1,11 +1,19 @@
-URF Reproducibility Bundle
+Lean Formalization Status
 
-One-command reproduction of canonical URF artifacts.
+Modules
+URFReproduce.MerkleAlgebra
+URFReproduce.CanonicalSerialization
+URFReproduce.ReplayDeterminism
+URFReproduce.FailureToWitness
+URFReproduce.NormalForm
 
-Contents
-- Deterministic verifier replay
-- Counterexamples replay
-- Environment pinning
+Build
+lake update
+lake build
 
-Status
-Canonical and frozen.
+Deterministic Guarantees
+Canonical serialization uniqueness implies hash uniqueness
+Merkle root determinism over canonical artifact ordering
+Replay determinism implies certificate hash invariance
+Failure to witness reduction totality
+Existence of minimal replay complete normal form N(I,E,C)

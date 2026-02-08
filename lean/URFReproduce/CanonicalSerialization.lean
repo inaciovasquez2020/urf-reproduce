@@ -4,36 +4,40 @@ abbrev Bytes := List UInt8
 
 axiom SHA256 : Bytes → Bytes
 
-structure Certificate where
-  version : String
-  payload : Bytes
-  certificateHash : Bytes
+axiom serializeCanonical :
+  {α : Type} → α → Bytes
 
-axiom CanonicalSerialize : Certificate → Bytes
+axiom serialize_canonical_unique :
+  ∀ {α} (x y : α),
+    serializeCanonical x = serializeCanonical y → x = y
 
-axiom CanonicalSerialize_injective :
-  ∀ c1 c2 : Certificate,
-    CanonicalSerialize c1 = CanonicalSerialize c2 → c1 = c2
-
-axiom SHA256_collision_resistant :
-  ∀ x y : Bytes,
-    SHA256 x = SHA256 y → x = y
-
-def CertificateHash (c : Certificate) : Bytes :=
-  SHA256 (CanonicalSerialize c)
-
-theorem CertificateHash_unique :
-  ∀ c1 c2 : Certificate,
-    CertificateHash c1 = CertificateHash c2 →
-    c1 = c2 :=
+theorem canonical_serialization_hash_unique :
+  ∀ {α} (x y : α),
+    SHA256 (serializeCanonical x) =
+    SHA256 (serializeCanonical y) →
+    serializeCanonical x = serializeCanonical y →
+    x = y :=
 by
-  intro c1 c2 h
-  unfold CertificateHash at h
-  have h1 := SHA256_collision_resistant
-    (CanonicalSerialize c1)
-    (CanonicalSerialize c2)
-    h
-  exact CanonicalSerialize_injective c1 c2 h1
+  intro α x y hhash hser
+  exact serialize_canonical_unique x y hser
+
+axiom sha256_collision_resistant :
+  ∀ b1 b2 : Bytes,
+    SHA256 b1 = SHA256 b2 → b1 = b2
+
+theorem canonical_hash_unique_strong :
+  ∀ {α} (x y : α),
+    SHA256 (serializeCanonical x) =
+    SHA256 (serializeCanonical y) →
+    x = y :=
+by
+  intro α x y h
+  have hbytes :=
+    sha256_collision_resistant
+      (serializeCanonical x)
+      (serializeCanonical y)
+      h
+  exact serialize_canonical_unique x y hbytes
 
 end URFReproduce
 

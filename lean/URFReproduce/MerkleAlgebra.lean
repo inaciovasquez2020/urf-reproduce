@@ -3,59 +3,42 @@ namespace URFReproduce
 abbrev Bytes := List UInt8
 
 axiom SHA256 : Bytes → Bytes
+axiom concat : Bytes → Bytes → Bytes
 
-structure Artifact where
-  path : String
-  hash : Bytes
+def hashPair (a b : Bytes) : Bytes :=
+  SHA256 (concat a b)
 
-abbrev ArtifactList := List Artifact
+inductive MerkleTree
+| leaf : Bytes → MerkleTree
+| node : MerkleTree → MerkleTree → MerkleTree
 
-axiom ArtifactSerialize : Artifact → Bytes
+open MerkleTree
 
-def LeafHash (a : Artifact) : Bytes :=
-  SHA256 (ArtifactSerialize a)
+def MerkleRoot : MerkleTree → Bytes
+| leaf b => SHA256 b
+| node l r => hashPair (MerkleRoot l) (MerkleRoot r)
 
-def CombineHash (l r : Bytes) : Bytes :=
-  SHA256 (l ++ r)
+axiom OrderedArtifacts : Type
+axiom buildTree : OrderedArtifacts → MerkleTree
+axiom flattenArtifacts : OrderedArtifacts → List Bytes
 
-def MerkleFold : List Bytes → Bytes
-| []        => SHA256 []
-| [x]       => x
-| x :: y :: rest => MerkleFold (CombineHash x y :: rest)
+axiom buildTree_sound :
+  ∀ A, MerkleRoot (buildTree A) =
+       foldl hashPair (SHA256 []) (flattenArtifacts A)
 
-def LeafList (as : ArtifactList) : List Bytes :=
-  as.map LeafHash
+axiom OrderedArtifacts_ext :
+  ∀ A B,
+    flattenArtifacts A = flattenArtifacts B → A = B
 
-def MerkleRoot (as : ArtifactList) : Bytes :=
-  MerkleFold (LeafList as)
-
-axiom ArtifactSerialize_injective :
-  ∀ a b : Artifact,
-    ArtifactSerialize a = ArtifactSerialize b → a = b
-
-axiom SHA256_collision_resistant :
-  ∀ x y : Bytes,
-    SHA256 x = SHA256 y → x = y
-
-axiom OrderedArtifacts :
-  ArtifactList → Prop
-
-axiom CanonicalOrder_unique :
-  ∀ as1 as2,
-    OrderedArtifacts as1 →
-    OrderedArtifacts as2 →
-    LeafList as1 = LeafList as2 →
-    as1 = as2
-
-theorem MerkleRoot_unique
-  (as1 as2 : ArtifactList)
-  (h1 : OrderedArtifacts as1)
-  (h2 : OrderedArtifacts as2)
-  (h : MerkleRoot as1 = MerkleRoot as2) :
-  as1 = as2 :=
+theorem MerkleRoot_unique :
+  ∀ A B,
+    MerkleRoot (buildTree A) = MerkleRoot (buildTree B) →
+    flattenArtifacts A = flattenArtifacts B :=
 by
-  unfold MerkleRoot at h
-  admit
+  intro A B h
+  have hA := buildTree_sound A
+  have hB := buildTree_sound B
+  sorry
 
 end URFReproduce
 

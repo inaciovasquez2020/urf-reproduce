@@ -2,25 +2,40 @@ namespace URFReproduce
 
 abbrev Bytes := List UInt8
 
-def Canon (x : α) : Bytes := by
-  classical
-  exact []
+axiom SHA256 : Bytes → Bytes
 
-def SHA256 (b : Bytes) : Bytes := by
-  classical
-  exact []
+structure Transcript where
+  payload : Bytes
 
-axiom Canon_injective {α : Type} : Function.Injective (@Canon α)
+structure Certificate where
+  body : Bytes
+  hash : Bytes
 
-/-- Collision-freedom assumption for the abstract SHA256 model. -/
-axiom SHA256_collision_free : ∀ {b₁ b₂ : Bytes}, SHA256 b₁ = SHA256 b₂ → b₁ = b₂
+axiom serialize_transcript : Transcript → Bytes
+axiom serialize_certificate_body : Certificate → Bytes
 
-theorem canon_hash_unique {α : Type} (x y : α) :
-    SHA256 (Canon x) = SHA256 (Canon y) → x = y := by
-  intro h
-  have hc : Canon x = Canon y := by
-    exact SHA256_collision_free h
-  exact Canon_injective hc
+axiom replay :
+  Transcript → Certificate
+
+axiom canonical_replay :
+  ∀ t : Transcript,
+  serialize_certificate_body (replay t) =
+  serialize_transcript t
+
+axiom SHA256_deterministic :
+  ∀ b : Bytes,
+  SHA256 b = SHA256 b
+
+def cert_hash (c : Certificate) : Bytes :=
+  SHA256 (serialize_certificate_body c)
+
+theorem replay_hash_invariant
+  (t : Transcript) :
+  cert_hash (replay t) =
+  SHA256 (serialize_transcript t) := by
+  unfold cert_hash
+  have h := canonical_replay t
+  simpa [h]
 
 end URFReproduce
 

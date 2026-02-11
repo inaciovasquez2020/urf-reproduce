@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cmd="${1:-}"
+
+case "$cmd" in
+  demo)
+    echo "URF reproduce demo:"
+    test -f examples/demo-artifact/artifact.txt
+    echo "OK: demo artifact exists"
+    ;;
+  *)
+    echo "Usage: ./scripts/reproduce demo"
+    exit 2
+    ;;
+esac

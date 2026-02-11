@@ -9,3 +9,9 @@ Contents
 
 Status
 Canonical and frozen.
+
+## Quickstart (60 seconds)
+
+```bash
+./scripts/reproduce demo
+```

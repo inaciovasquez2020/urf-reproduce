@@ -1,0 +1,16 @@
+{
+"certificate_type": "URF-ROOT",
+"version": "1.0.0",
+"normal_form": "N(I,E,C)",
+"merkle_root_sha256": "REPLACE_WITH_REAL_MERKLE_ROOT",
+"environment": {
+"oci_image_digest": "REPLACE_WITH_REAL_OCI_DIGEST"
+},
+"replay": {
+"transcript_equivalence": "byte_level",
+"determinism": true
+},
+"hashes": {
+"certificate_sha256": "REPLACE_WITH_REAL_CERT_HASH"
+}
+}

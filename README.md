@@ -1,3 +1,5 @@
+**Latest release:** URF Reproduce v0.2 — https://github.com/inaciovasquez2020/urf-reproduce/releases/tag/urf-reproduce-v0.2n
+
 URF Reproducibility Bundle
 
 One-command reproduction of canonical URF artifacts.

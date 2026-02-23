@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite it as follows."
+title: "urf-reproduce"
+version: 0.1.0
+date-released: 2026-02-23
+authors:
+  - family-names: Vasquez
+    given-names: Inacio F.
+    affiliation: Independent Researcher
+repository-code: https://github.com/inaciovasquez2020/urf-reproduce
+url: https://github.com/inaciovasquez2020/urf-reproduce
+license: MIT

@@ -1,0 +1,19 @@
+{
+  "n": 100,
+  "c0": 0.5,
+  "Ccap": 1.0,
+  "k": 2.0,
+  "Cloc": 10.0,
+  "c1": 0.4,
+  "c2": 0.2,
+  "Vmax": 10.0,
+  "constants": {
+    "kappa_cap": 2.0,
+    "kappa_loc": 2.0,
+    "kappa_ref": 5.0,
+    "kappa_bg": 2.0,
+    "kappa_bdry": 2.0,
+    "kappa_var": 2.0,
+    "kappa_err": 2.0
+  }
+}
